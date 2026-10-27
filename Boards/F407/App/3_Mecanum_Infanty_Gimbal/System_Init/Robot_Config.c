@@ -39,7 +39,7 @@ CAN_RX_NODE(CAN1, 0x302, &gimbal_motors.DM4310_Pitch, DM_1to4_Resolve);
 OFFLINE_NODE(&gimbal_motors.DM4310_Pitch.offline, MOTOR_OFFLINE_TIME, GIMBAL);
 
 CAN_RX_NODE(CAN1, 0x203, &shoot_motors.DJI_2006_bo, DJI_Motor_Resolve);
-OFFLINE_NODE(&shoot_motors.DJI_2006_bo.offline, MOTOR_OFFLINE_TIME, SHOOT);
+//OFFLINE_NODE(&shoot_motors.DJI_2006_bo.offline, MOTOR_OFFLINE_TIME, SHOOT);
 
 CAN_RX_NODE(CAN2, 0x201, &shoot_motors.DJI_3508_L, DJI_Motor_Resolve);
 OFFLINE_NODE(&shoot_motors.DJI_3508_L.offline, MOTOR_OFFLINE_TIME, SHOOT);

@@ -21,17 +21,18 @@ static Gimbal_Ctrl_Block_t gimbal_ctrl;
 uint8_t Gimbal_Control_Init(void)
 {
     // Pitch PID参数初始化
-    float PID_Pitch_P[3] = {0.5f,   0.0f,  0.0f};
+    float PID_Pitch_P[3] = {0.58f,   0.0f,  0.0f};
         PID_Init(&gimbal_ctrl.Pitch_P, 50.0f, 30.0f, PID_Pitch_P,
             0, 0, 0, 0, 0, Integral_Limit | ErrorHandle);
-    float PID_Pitch_S[3] = {-5.0f,   -0.02f,   0.0f};
+    float PID_Pitch_S[3] = {-5.0f,   -0.03f,   0.0f};
     PID_Init(&gimbal_ctrl.Pitch_S, 30.0f, 5.0f, PID_Pitch_S,
              0, 0, 0, 0, 0, Integral_Limit | ErrorHandle);
     //Yaw PID参数初始化
+
     float PID_Yaw_P[3] = {0.4f,   0.0f,  0.0f};
     PID_Init(&gimbal_ctrl.Yaw_P, 20.0f, 5.0f, PID_Yaw_P,
         0, 0, 0, 0, 0, Integral_Limit | ErrorHandle);
-    float PID_Yaw_S[3] = {-6.2f,   -0.02f,   0.0f};
+    float PID_Yaw_S[3] = {-6.7f,   -0.025f,   0.0f};
     PID_Init(&gimbal_ctrl.Yaw_S, 30.0f, 3.0f, PID_Yaw_S,
              0, 0, 0, 0, 0, Integral_Limit | ErrorHandle);
     //向系统下发底盘当前状态，准备中
@@ -58,7 +59,7 @@ void Gimbal_Control_Task(const Gimbal_Motor_Group_t *g_motor,const IMU_Data_t *g
                              sys_state.global_mode == GLOBAL_STANDBY ||
                              sys_state.global_mode == GLOBAL_INIT_STAGE);
 
-    if (gimbal_cmd.mode == GIMBAL_CMD_SAFE || is_system_locked)
+    if (gimbal_cmd. mode == GIMBAL_CMD_SAFE || is_system_locked)
     {
         // 清空PID
         for (int i = 0; i < 4; i++) {
@@ -73,10 +74,10 @@ void Gimbal_Control_Task(const Gimbal_Motor_Group_t *g_motor,const IMU_Data_t *g
     {
         gimbal_ctrl.Yaw_P.Ref = g_imu->yaw + normalize_to_pi((gimbal_cmd.target_yaw - g_imu->yaw) * DEG2RAD) * RAD2DEG;
         PID_Calculate(&gimbal_ctrl.Yaw_P, g_imu->yaw, gimbal_ctrl.Yaw_P.Ref);
-        PID_Calculate(&gimbal_ctrl.Yaw_S,g_imu->gyro[2],gimbal_ctrl.Yaw_P.Output - gimbal_cmd.target_yaw_rate);
+        PID_Calculate(&gimbal_ctrl.Yaw_S,g_imu->gyro[2],gimbal_ctrl.Yaw_P.Output+gimbal_cmd.target_yaw_rate );//+ gimbal_cmd.target_yaw_rate);
 
         PID_Calculate(&gimbal_ctrl.Pitch_P,g_imu->pitch,gimbal_cmd.target_pitch);
-        PID_Calculate(&gimbal_ctrl.Pitch_S,g_imu->gyro[1],gimbal_ctrl.Pitch_P.Output - gimbal_cmd.target_pitch_rate);
+        PID_Calculate(&gimbal_ctrl.Pitch_S,g_imu->gyro[1],gimbal_ctrl.Pitch_P.Output+gimbal_cmd.target_pitch_rate );//+ gimbal_cmd.target_pitch_rate);
     }
 
     DM_Motor_Send(&hcan1, 0x3FE,

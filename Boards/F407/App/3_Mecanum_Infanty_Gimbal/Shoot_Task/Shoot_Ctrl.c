@@ -26,8 +26,8 @@ uint8_t Shoot_Control_Init(void)
     shoot_ctrl.dir_sign = -1;//拨盘旋向为反
     shoot_ctrl.Feeder_Count.target_freq = 18;//目标弹频
 
-    shoot_ctrl.Lfire_speed = -6500.0f;//左摩擦轮目标转速
-    shoot_ctrl.Rfire_speed = 6500.0f;//右摩擦轮目标转速
+    shoot_ctrl.Lfire_speed = -7000.0f;//左摩擦轮目标转速
+    shoot_ctrl.Rfire_speed = +7000.0f;//右摩擦轮目标转速
 
     shoot_ctrl.Counts_Shoot=shoot_ctrl.motor_ratio * shoot_ctrl.feed_ratio * 8192.0f / shoot_ctrl.slot_num;//计算拨盘每一发需要的编码器值
     // 拨盘电机PID参数初始化
@@ -105,8 +105,8 @@ void Shoot_Control_Task(const Shoot_Motor_Group_t *g_motor, float dt)
         shoot_ctrl.Feeder_Count.target_pos_cnt = shoot_ctrl.dir_sign * (int32_t)ceilf(smooth_ref / (shoot_ctrl.Counts_Shoot) - 0.1f);
     }
     if (shoot_cmd.mode == SHOOT_CMD_RUN || shoot_cmd.mode == SHOOT_CMD_FIRE) {
-        shoot_ctrl.Lfire_speed = -6500.0f;//左摩擦轮目标转速
-        shoot_ctrl.Rfire_speed = 6500.0f;//右摩擦轮目标转速
+        shoot_ctrl.Lfire_speed = -7000.0f;//左摩擦轮目标转速
+        shoot_ctrl.Rfire_speed = 7000.0f;//右摩擦轮目标转速
         if (!is_init)
         {
             smooth_ref = g_motor->DJI_2006_bo.Angle_Infinite;
@@ -169,7 +169,7 @@ void Shoot_Control_Task(const Shoot_Motor_Group_t *g_motor, float dt)
     PID_Calculate(&shoot_ctrl.Bmotor_P, g_motor->DJI_2006_bo.Angle_Infinite, shoot_ctrl.Bmotor_P.Ref);
     PID_Calculate(&shoot_ctrl.Bmotor_S, g_motor->DJI_2006_bo.Speed_now, shoot_ctrl.Bmotor_P .Output);
 
-    DJI_Motor_Send(&hcan2,0x200,shoot_ctrl.Lfire_S.Output,shoot_ctrl.Rfire_S.Output,0,0);
+    DJI_Motor_Send(&hcan2,0x200,shoot_ctrl.Lfire_S. Output,shoot_ctrl.Rfire_S.Output,0,0);
     DJI_Motor_Send(&hcan1,0x200,0,0,shoot_ctrl.Bmotor_S.Output,0 );
 }
 /**

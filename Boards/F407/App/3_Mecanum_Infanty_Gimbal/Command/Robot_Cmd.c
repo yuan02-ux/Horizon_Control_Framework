@@ -64,11 +64,12 @@ void Robot_Cmd_Update(void)
         Cmd_Update_Remote_Ctrl();
     }
 
+    System_State_Report(ID_VISION,STATUS_RUN);
     if (!vision_Recv.offline.is_online) {
         System_State_Report(ID_VISION,STATUS_LOST);
     }
     else {
-        System_State_Report(ID_VISION,STATUS_RUN);
+
     }
 
     // 双板通信
@@ -105,11 +106,11 @@ static void Cmd_Update_Remote_Ctrl(void)
     //云台
     if (vision_Recv.target_found==1 && DBUS.Remote.S1!=1 && vision_Recv.offline.is_online) {
         gimbal_cmd.mode = GIMBAL_CMD_AUTO_AIM;
-        gimbal_cmd.target_yaw_rate = vision_Recv.yaw_plan * DEG2RAD;
+        gimbal_cmd.target_yaw_rate = -vision_Recv.yaw_plan;
         gimbal_cmd.target_yaw = -vision_Recv.yaw;
         gimbal_cmd.target_yaw = normalize_to_pi(gimbal_cmd.target_yaw * DEG2RAD) * RAD2DEG;
 
-        gimbal_cmd.target_pitch_rate = vision_Recv.pitch_plan * DEG2RAD;
+        gimbal_cmd.target_pitch_rate = -vision_Recv.pitch_plan ;
         gimbal_cmd.target_pitch = -vision_Recv.pitch;
         gimbal_cmd.target_pitch = MATH_Limit_float(gimbal_cmd.target_pitch, -31.0f, 13.0f);
     }
@@ -132,8 +133,8 @@ static void Cmd_Update_Remote_Ctrl(void)
     shoot_cmd.cool = C2G.cooling;
     shoot_cmd.trigger_single = (DBUS.Remote.S2==1 && shoot_cmd.last_fn1==3);
     shoot_cmd.trigger_auto   = (DBUS.Remote.S2==2);
-    if (DBUS.Remote.S1!=2) {
-        if (DBUS.Remote.S2 != 3) {
+    if (DBUS.Remote.S1==1) {
+        if (1) {
             shoot_cmd.mode = SHOOT_CMD_RUN;
             if (shoot_cmd.trigger_single || shoot_cmd.trigger_auto)
             {
@@ -143,15 +144,24 @@ static void Cmd_Update_Remote_Ctrl(void)
         shoot_cmd.last_fn1 = DBUS.Remote.S2;
     }
 
-    else {
+    if (DBUS.Remote.S1==2) {
+        shoot_cmd.mode = SHOOT_CMD_READY;
+        if (vision_Recv.target_found==1 && vision_Recv.fire_command==1)
+        {
+                shoot_cmd.mode = SHOOT_CMD_READY;
+
+        }
+    }
+    if (DBUS.Remote.S1==3) {
         shoot_cmd.mode = SHOOT_CMD_RUN;
         if (vision_Recv.target_found==1 && vision_Recv.fire_command==1)
         {
-            shoot_cmd.mode = SHOOT_CMD_FIRE;
+                shoot_cmd.mode = SHOOT_CMD_FIRE;
         }
     }
-
 }
+
+
 
 /**
  * @brief 键鼠模式
